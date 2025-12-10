@@ -1,0 +1,12 @@
+dbt_demo:
+  outputs:
+    dev:
+      dataset: payments
+      keyfile: keyfile.json
+      method: service-account
+      priority: interactive
+      project: prd-dagen
+      threads: 4
+      timeout_seconds: 300
+      type: bigquery
+  target: dev

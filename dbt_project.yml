@@ -1,0 +1,66 @@
+# Name your project! Project names should be lowercase and use underscores as separators
+# See documentation: https://docs.getdbt.com/docs/building-a-dbt-project/projects
+
+name: 'dbt_demo'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'dbt_demo'
+
+# These configurations specify where dbt should look for different types of files.
+# The `source-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+model-paths: ["models"]
+analysis-paths: ["analysis"]
+test-paths: ["tests"]
+data-paths: ["data"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"  # directory which will store compiled SQL files
+clean-targets:         # directories to be removed by `dbt clean`
+  - "target"
+  - "dbt_packages"
+
+# Configuring models
+# Full documentation: https://docs.getdbt.com/docs/configuring-models
+
+models:
+  dbt_demo:
+    # Staging models
+    staging:
+      +materialized: view
+      +schema: staging
+      +tags: ["staging"]
+    
+    # Dimension models
+    dimensions:
+      +materialized: table
+      +schema: dimensions
+      +tags: ["dimensions"]
+      +unique_id: "{{ this.schema }}.{{ this.name }}"
+    
+    # Fact models
+    facts:
+      +materialized: table
+      +schema: facts
+      +tags: ["facts"]
+    
+    # Analytics models
+    analytics:
+      +materialized: table
+      +schema: analytics
+      +tags: ["analytics"]
+
+vars:
+  # You can define variables here in dbt_project.yml
+  project_id: 'prd-dagen'
+  dataset_id: 'payments_v1'
+  start_date: '2020-01-01'
+  payment_methods:
+    - 'credit_card'
+    - 'debit_card'
+    - 'bank_transfer'
+    - 'wallet'
+    - 'check'
