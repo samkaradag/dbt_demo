@@ -1,0 +1,116 @@
+﻿Creating documentation for an SAP Data Model (whether for SAP HANA Calculation Views, CDS Views, or BW/4HANA objects) is critical for maintainability and governance. A good data model document bridges the gap between business requirements and technical implementation.
+Below is a comprehensive Standard Operating Procedure (SOP) and Template for documenting SAP Data Models.
+________________
+
+
+1. Document Control Information
+Start every document with metadata to track changes and ownership.
+Attribute
+	Details
+	Object Name
+	CV_SALES_ACTUALS_YTD (Example)
+	Object Type
+	Calculation View / CDS View / ADSO
+	Module/Domain
+	SD (Sales & Distribution) / FI (Finance)
+	Owner
+	Data Architecture Team
+	Last Updated
+	December 2025
+	Status
+	Active / Deprecated / In Development
+	________________
+
+
+2. Business Context & Scope
+This section explains "Why" this model exists, ensuring non-technical stakeholders understand its purpose.
+2.1 Functional Description
+* Goal: Briefly describe what business question this model answers.
+* Example: "This model aggregates daily sales order line items to provide Year-To-Date (YTD) revenue analysis by region and product category."
+* Key KPIs: List the measures calculated (e.g., Net Revenue, Gross Margin, Sales Quantity).
+2.2 User Audience
+* Who consumes this data? (e.g., Regional Sales Managers, CFO Dashboard).
+* Which frontend tools connect here? (e.g., SAP Analytics Cloud, PowerBI, Fiori Apps).
+________________
+
+
+3. Technical Architecture & Design
+This is the core for developers and architects. It details "How" the model works.
+3.1 Data Flow Diagram
+Visuals are essential here. Insert a screenshot of your HANA view or a generated lineage diagram.
+ Image of SAP HANA Calculation View data flow diagram 
+
+Shutterstock
+3.2 Source Tables / Objects
+List the raw tables or lower-level views feeding this model.
+Source Object
+	Type
+	Description
+	Join Type
+	Cardinality
+	VBAK
+	Table
+	Sales Document: Header Data
+	Left Outer
+	1:N
+	VBAP
+	Table
+	Sales Document: Item Data
+	Inner
+	1:1
+	KNA1
+	Table
+	Customer Master
+	Left Outer
+	1:1
+	3.3 Join Logic & Filters
+* Join Conditions: Specify the keys used (e.g., VBAK.VBELN = VBAP.VBELN).
+* Static Filters: Document any hard-coded filters applied at the source (e.g., MANDT = '100' or DOC_TYPE = 'OR').
+________________
+
+
+4. Field Mapping & Transformation Logic
+This is the most frequently referenced section for debugging.
+Note: If you use complex SQL expressions or calculated columns, paste the exact logic here.
+Field Name (Target)
+	Source Field
+	Data Type
+	Logic / Formula
+	Description
+	CUSTOMER_ID
+	KNA1.KUNNR
+	NVARCHAR(10)
+	Direct Mapping
+	Unique customer identifier
+	NET_VALUE_LC
+	VBAP.NETWR
+	DEC(15,2)
+	IF(CURR='USD', NETWR, NETWR*EXCH_RATE)
+	Net value converted to Local Currency
+	SALES_YEAR
+	VBAK.AUDAT
+	CHAR(4)
+	YEAR(AUDAT)
+	Extracted year from order date
+	________________
+
+
+5. Performance & Partitioning
+Critical for large datasets in SAP HANA/BW.
+* Input Parameters: List any mandatory prompts (e.g., IP_YEAR, IP_REGION) that filter data before execution to improve speed.
+* Partitioning Strategy: Is the underlying table partitioned? (e.g., Hash partitioned by GL_Account).
+* Engine: Specify if the execution is forced to SQL Engine or Calculation Engine.
+________________
+
+
+6. Security & Authorization
+Define who is allowed to see data within this model.
+* Analytic Privileges: Does the model restrict data by region or company code?
+   * Example: AP_SALES_US (Restricts view to Country = 'US').
+* Data Masking: Are sensitive fields (like SSN or Salary) masked?
+________________
+
+
+7. Troubleshooting & Lineage
+* Dependency Tree: What happens if this view fails? (e.g., "Impacts the CEO's Daily Sales Report").
+* Common Errors: Document known issues (e.g., "Duplicate records occur if Order Status is not filtered").
